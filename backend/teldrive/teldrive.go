@@ -37,9 +37,9 @@ const (
 	decayConstant    = 2
 	attackConstant   = 0
 	timeFormat       = time.RFC3339
-	maxChunkSize     = 2000 * fs.Mebi
-	defaultChunkSize = 1000 * fs.Mebi
-	minChunkSize     = 500 * fs.Mebi
+	maxChunkSize     = 4000 * fs.Mebi
+	defaultChunkSize = 2000 * fs.Mebi
+	minChunkSize     = 100 * fs.Mebi
 )
 
 func init() {
