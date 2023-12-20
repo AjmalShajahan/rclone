@@ -76,7 +76,7 @@ func init() {
 		},
 			{
 				Name:    "encrypt_files",
-				Default: true,
+				Default: false,
 				Help:    "Enable Native  Teldrive Encryption",
 			}, {
 
@@ -261,18 +261,29 @@ func NewFs(ctx context.Context, name string, root string, config configmap.Mappe
 		Path:   "/api/auth/session",
 	}
 
-	var session api.Session
-	err = f.pacer.Call(func() (bool, error) {
-		resp, err := f.srv.CallJSON(ctx, &opts, nil, &session)
-		return shouldRetry(ctx, resp, err)
-	})
+	var
+	(
+		session api.Session
+		sessionResp *http.Response
+	)
 
+	err = f.pacer.Call(func() (bool, error) {
+		sessionResp, err = f.srv.CallJSON(ctx, &opts, nil, &session)
+		return shouldRetry(ctx, sessionResp, err)
+	})
+	
 	if err != nil {
 		return nil, err
 	}
 
 	if session.Hash == "" {
 		return nil, fmt.Errorf("invalid session token")
+	}
+
+	for _, cookie := range sessionResp.Cookies() {
+		if cookie.Name == "user-session" {
+			config.Set("access_token", cookie.Value)
+		}
 	}
 
 	f.authHash = session.Hash
@@ -597,8 +608,6 @@ func (f *Fs) putUnchecked(ctx context.Context, in0 io.Reader, src fs.ObjectInfo,
 
 	var uploadedSize int64
 
-	name := leaf
-
 	in := bufio.NewReader(in0)
 
 	channelID := f.opt.ChannelID
@@ -610,6 +619,8 @@ func (f *Fs) putUnchecked(ctx context.Context, in0 io.Reader, src fs.ObjectInfo,
 
 		encryptFile = uploadFile.Parts[0].Encrypted
 	}
+
+	var partName string
 
 	for partNo := 1; partNo <= int(totalParts); partNo++ {
 
@@ -627,9 +638,9 @@ func (f *Fs) putUnchecked(ctx context.Context, in0 io.Reader, src fs.ObjectInfo,
 
 		if f.opt.RandomisePart {
 			u1, _ := uuid.NewV4()
-			name = hex.EncodeToString(u1.Bytes())
+			partName = hex.EncodeToString(u1.Bytes())
 		} else if totalParts > 1 {
-			name = fmt.Sprintf("%s.part.%03d", name, partNo)
+			partName = fmt.Sprintf("%s.part.%03d", leaf, partNo)
 		}
 
 		opts := rest.Opts{
@@ -638,7 +649,8 @@ func (f *Fs) putUnchecked(ctx context.Context, in0 io.Reader, src fs.ObjectInfo,
 			Body:          partReader,
 			ContentLength: &chunkSize,
 			Parameters: url.Values{
-				"fileName":  []string{name},
+				"partName":  []string{partName},
+				"fileName":  []string{leaf},
 				"partNo":    []string{strconv.Itoa(partNo)},
 				"channelId": []string{strconv.FormatInt(channelID, 10)},
 				"encrypted": []string{strconv.FormatBool(encryptFile)},
