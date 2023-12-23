@@ -71,12 +71,6 @@ type DirMove struct {
 	Destination string `json:"destination"`
 }
 
-// UpdateResponse is a generic response to various action on files (rename/copy/move)
-type UpdateResponse struct {
-	Message string `json:"message,omitempty"`
-	Status  bool   `json:"status"`
-}
-
 // Download is the response when requesting a download link
 type Download struct {
 	StatusCode int    `json:"statusCode"`
@@ -159,4 +153,12 @@ type RemoveFileRequest struct {
 // Token represents the authentication token
 type Token struct {
 	Token string `json:"token"`
+}
+
+type Session struct {
+	User struct {
+		Name  string `json:"name"`
+		Email string `json:"email"`
+		Image string `json:"image"`
+	} `json:"user"`
 }
