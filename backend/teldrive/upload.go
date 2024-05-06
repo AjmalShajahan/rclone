@@ -2,6 +2,7 @@ package teldrive
 
 import (
 	"context"
+	"crypto/md5"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -11,7 +12,7 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 	"github.com/rclone/rclone/backend/teldrive/api"
 	"github.com/rclone/rclone/lib/rest"
 
@@ -38,6 +39,11 @@ type objectChunkWriter struct {
 	totalParts      int64
 	channelID       int64
 	encryptFile     bool
+}
+
+func getMD5Hash(text string) string {
+	hash := md5.Sum([]byte(text))
+	return hex.EncodeToString(hash[:])
 }
 
 // WriteChunk will write chunk number with reader bytes, where chunk number >= 0
@@ -78,10 +84,8 @@ func (w *objectChunkWriter) WriteChunk(ctx context.Context, chunkNumber int, rea
 
 		fs.Debugf(w.o, "Sending chunk %d length %d", chunkNumber, size)
 		if w.f.opt.RandomisePart {
-			u1, _ := uuid.NewV4()
-			partName = hex.EncodeToString(u1.Bytes())
+			partName = getMD5Hash(uuid.New().String())
 		} else {
-
 			partName = fileName
 			if w.totalParts > 1 {
 				partName = fmt.Sprintf("%s.part.%03d", fileName, chunkNumber)
@@ -111,15 +115,12 @@ func (w *objectChunkWriter) WriteChunk(ctx context.Context, chunkNumber int, rea
 
 	})
 
-	if err != nil {
-		fs.Debugf(w.o, "Error sending chunk %d: %v", chunkNumber, err)
-	} else {
-		if response.PartId == 0 {
-			return 0, fmt.Errorf(" upload failed for chunk %d", chunkNumber)
-		}
-		w.addCompletedPart(response)
-		fs.Debugf(w.o, "Done sending chunk %d", chunkNumber)
+	if err != nil || response.PartId == 0 {
+		return 0, fmt.Errorf("error sending chunk %d: %v", chunkNumber, err)
 	}
+	w.addCompletedPart(response)
+	fs.Debugf(w.o, "Done sending chunk %d", chunkNumber)
+
 	return size, err
 
 }
@@ -203,7 +204,7 @@ func (o *Object) prepareUpload(ctx context.Context, src fs.ObjectInfo, options [
 
 	modTime := src.ModTime(ctx).UTC().Format(timeFormat)
 
-	uploadID := MD5(fmt.Sprintf("%s:%d:%s", path.Join(base, leaf), src.Size(), modTime))
+	uploadID := getMD5Hash(fmt.Sprintf("%s:%d:%s", path.Join(base, leaf), src.Size(), modTime))
 
 	var uploadParts api.UploadFile
 	opts := rest.Opts{
