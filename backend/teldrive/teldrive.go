@@ -32,7 +32,7 @@ const (
 	timeFormat       = time.RFC3339
 	maxChunkSize     = 4000 * fs.Mebi
 	defaultChunkSize = 1000 * fs.Mebi
-	minChunkSize     = 10 * fs.Mebi
+	minChunkSize     = 1 * fs.Mebi
 )
 
 func init() {
