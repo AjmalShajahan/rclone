@@ -1,16 +1,20 @@
 name: build
 
 on:
+  workflow_dispatch:
   push:
+    branches:
+      - test
     tags:
-      - '**'
+      - "**"
+
 jobs:
   build:
     timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
-        job_name: ['linux', 'windows']
+        job_name: ["linux", "windows"]
 
         include:
           - job_name: linux
@@ -52,7 +56,6 @@ jobs:
           echo 'BUILD_FLAGS=${{ matrix.build_flags }}' >> $GITHUB_ENV
           echo 'BUILD_ARGS=${{ matrix.build_args }}' >> $GITHUB_ENV
           if [[ "${{ matrix.cgo }}" != "" ]]; then echo 'CGO_ENABLED=${{ matrix.cgo }}' >> $GITHUB_ENV ; fi
-
       - name: Install Libraries on Linux
         shell: bash
         run: |
@@ -195,14 +198,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          
+
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
            path: ${{ github.workspace }}/build
            pattern: rclone-*
            merge-multiple: true
-      
+
       - name: Upload Assets
         shell: bash
         env:
