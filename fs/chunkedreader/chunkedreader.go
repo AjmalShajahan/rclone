@@ -40,7 +40,7 @@ func New(ctx context.Context, o fs.Object, initialChunkSize int64, maxChunkSize 
 	if streams < 0 {
 		streams = 0
 	}
-	if streams == 0 || o.Size() < 0 {
+	if streams <= 1 || o.Size() < 0 {
 		return newSequential(ctx, o, initialChunkSize, maxChunkSize)
 	}
 	return newParallel(ctx, o, initialChunkSize, streams)

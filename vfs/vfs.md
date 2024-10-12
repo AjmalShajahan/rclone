@@ -254,9 +254,25 @@ The chunks will not be buffered in memory.
 
 #### `--vfs-read-chunk-streams` > 0
 
-Rclone read `--vfs-read-chunk-streams` chunks of size
-`--vfs-read-chunk-size` in parallel. The size for each read will stay
+Rclone reads `--vfs-read-chunk-streams` chunks of size
+`--vfs-read-chunk-size` concurrently. The size for each read will stay
 constant.
+
+This improves performance performance massively on high latency links
+or very high bandwidth links to high performance object stores.
+
+Some experimentation will be needed to find the optimum values of
+`--vfs-read-chunk-size` and `--vfs-read-chunk-streams` as these will
+depend on the backend in use and the latency to the backend.
+
+For high performance object stores (eg AWS S3) a reasonable place to
+start might be `--vfs-read-chunk-streams 16` and
+`--vfs-read-chunk-size 4M`. In testing with AWS S3 the performance
+scaled roughly as the `--vfs-read-chunk-streams` setting.
+
+Similar settings should work for high latency links, but depending on
+the latency they may need more `--vfs-read-chunk-streams` in order to
+get the throughput.
 
 ### VFS Performance
 
