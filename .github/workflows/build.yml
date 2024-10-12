@@ -9,7 +9,7 @@ on:
       - '**'
 
 env:
-  IMAGE: tgdrive/rclone
+  IMAGE: ${{ github.repository_owner }}/rclone
 
 
 jobs:
