@@ -9,7 +9,7 @@ on:
       - '**'
 
 env:
-  IMAGE: ${{ github.repository_owner }}/rclone
+  IMAGE:  ${{ github.repository }}
 
 
 jobs:
