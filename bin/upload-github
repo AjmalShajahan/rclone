@@ -7,7 +7,7 @@
 set -e
 
 # REPO="tgdrive/rclone"
-REPO=$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')
+REPO="ajmalshajahan/rclone"
 
 if [ "$1" == "" ]; then
     echo "Syntax: $0 Version"
