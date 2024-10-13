@@ -1,12 +1,15 @@
 name: build
 
 on:
+  workflow_dispatch:
   push:
+    branches:
+      - test
     tags:
       - '**'
 
 env:
-  IMAGE: tgdrive/rclone
+  IMAGE:  ajmalshajahan/rclone
 
 
 jobs:
@@ -15,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        job_name: ['linux', 'windows']
+        job_name: ["linux", "windows"]
 
         include:
           - job_name: linux
@@ -32,7 +35,7 @@ jobs:
             cgo: '0'
             build_flags: '-include "^(windows/amd64|windows/arm64)"'
             build_args: '-buildmode exe'
-          
+
           - job_name: mac_amd64
             os: macos-latest
             go: '>=1.23.0-rc.1'
@@ -69,7 +72,6 @@ jobs:
           echo 'BUILD_FLAGS=${{ matrix.build_flags }}' >> $GITHUB_ENV
           echo 'BUILD_ARGS=${{ matrix.build_args }}' >> $GITHUB_ENV
           if [[ "${{ matrix.cgo }}" != "" ]]; then echo 'CGO_ENABLED=${{ matrix.cgo }}' >> $GITHUB_ENV ; fi
-
       - name: Install Libraries on Linux
         shell: bash
         run: |
@@ -227,7 +229,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          
+
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
@@ -239,14 +241,14 @@ jobs:
         run: |
          mkdir build
          cp -r /tmp/build/* build/
-      
+
       - name: Upload Assets
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
          make upload_github
-      
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -256,7 +258,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Set Docker metadata
         id: docker_meta
         uses: docker/metadata-action@v5
@@ -267,7 +269,7 @@ jobs:
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.title=${{ env.IMAGE }}
             org.opencontainers.image.description=Rclone Docker Image
-      
+
       - name: Publish to Docker
         uses: docker/build-push-action@v6
         with:
