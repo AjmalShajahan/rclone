@@ -959,3 +959,14 @@ put them back in again.` >}}
   * huanghaojun <jasen.huang@ugreen.com>
   * Enduriel <endur1el@protonmail.com>
   * Markus Gerstel <markus.gerstel@osirium.com>
+  * simwai <16225108+simwai@users.noreply.github.com>
+  * Ben Alex <ben.alex@acegi.com.au>
+  * Klaas Freitag <opensource@freisturz.de> <klaas.freitag@kiteworks.com>
+  * Andrew Kreimer <algonell@gmail.com>
+  * Ed Craig-Wood <138211970+edc-w@users.noreply.github.com>
+  * Christian Richter <crichter@owncloud.com> <1058116+dragonchaser@users.noreply.github.com>
+  * Ralf Haferkamp <r.haferkamp@opencloud.eu>
+  * Jugal Kishore <me@devjugal.com>
+  * Tho Neyugn <nguyentruongtho@users.noreply.github.com>
+  * Ben Boeckel <mathstuf@users.noreply.github.com>
+  * Clément Wehrung <cwehrung@nurves.com>
